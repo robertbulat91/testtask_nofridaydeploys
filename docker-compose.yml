@@ -1,0 +1,18 @@
+volumes:
+  volume_database_project:
+
+services:
+  mysql-container:
+    image: mysql:8.0
+    container_name: task_nofridaydeploy_mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: project
+      MYSQL_USER: project
+      MYSQL_PASSWORD: project
+    volumes:
+      - volume_database_project:/var/lib/mysql
+    ports:
+      - "3306:3306"
+###> doctrine/doctrine-bundle ###
