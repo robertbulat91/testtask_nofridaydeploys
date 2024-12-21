@@ -13,6 +13,10 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/companies', name: 'restapi_company')]
 class CompaniesRestController extends AbstractController
 {
+    /**
+     * @param CompaniesRepository $companyRepository
+     * @return JsonResponse
+     */
     #[Route('/', name: 'companies_index', methods:['get'] )]
     public function index(CompaniesRepository $companyRepository): JsonResponse
     {
@@ -27,11 +31,12 @@ class CompaniesRestController extends AbstractController
          */
         foreach ($companies as $company) {
             $data[] = [
+                'id' => $company->getId(),
                 'name' => $company->getName(),
                 'taxerpayerIdentificationNumber' => $company->getTaxpayerIdentificationNumber(),
                 'address' => $company->getAddress(),
                 'city' => $company->getCity(),
-                'zipCode' => $company->getZipCode()
+                'zipCode' => $company->getPostalCode()
             ];
         }
 
@@ -39,6 +44,11 @@ class CompaniesRestController extends AbstractController
     }
 
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @return JsonResponse
+     */
     #[Route('/company/add', name: 'company_add', methods:['post'] )]
     public function create(EntityManagerInterface $entityManager, Request $request): JsonResponse
     {
@@ -50,14 +60,17 @@ class CompaniesRestController extends AbstractController
 
         $company = new Company();
 
-        isset($requestContent['company']['name']) ?? $company->setName($requestContent['company']['name']);
-        isset($requestContent['company']['taxpayerIdentificationNumber']) ?? $company->setTaxpayerIdentificationNumber($requestContent['company']['taxpayerIdentificationNumber']);
-        isset($requestContent['company']['address']) ?? $company->setAddress($requestContent['company']['address']);
-        isset($requestContent['company']['city']) ?? $company->setCity($requestContent['company']['city']);
-        isset($requestContent['company']['zipCode']) ?? $company->setPostalCode($requestContent['company']['zipCode']);
-
-        $entityManager->persist($company);
-        $entityManager->flush();
+        try {
+            $company->setName($requestContent['company']['name']);
+            $company->setTaxpayerIdentificationNumber($requestContent['company']['taxpayerIdentificationNumber']);
+            $company->setAddress($requestContent['company']['address']);
+            $company->setCity($requestContent['company']['city']);
+            $company->setPostalCode($requestContent['company']['zipCode']);
+            $entityManager->persist($company);
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()]);
+        }
 
         $data =  [
             'id' => $company->getId(),
@@ -71,6 +84,11 @@ class CompaniesRestController extends AbstractController
         return $this->json($data);
     }
 
+    /**
+     * @param CompaniesRepository $companyRepository
+     * @param int $id
+     * @return JsonResponse
+     */
     #[Route('/company/{id}', name: 'company_show', methods:['get'] )]
     public function show(CompaniesRepository $companyRepository, int $id): JsonResponse
     {
@@ -92,6 +110,12 @@ class CompaniesRestController extends AbstractController
         return $this->json($data);
     }
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
     #[Route('/company/{id}', name: 'company_update', methods:['put', 'patch'] )]
     public function update(EntityManagerInterface $entityManager, Request $request, int $id): JsonResponse
     {
@@ -106,26 +130,36 @@ class CompaniesRestController extends AbstractController
             return $this->json(['error' => 'Data doesn\'t exist']);
         }
 
-        $company = new Company();
+        try {
+            isset($requestContent['company']['name']) ?? $company->setName($requestContent['company']['name']);
+            isset($requestContent['company']['taxpayerIdentificationNumber']) ?? $company->setTaxpayerIdentificationNumber($requestContent['company']['taxpayerIdentificationNumber']);
+            isset($requestContent['company']['address']) ?? $company->setAddress($requestContent['company']['address']);
+            isset($requestContent['company']['city']) ?? $company->setCity($requestContent['company']['city']);
+            isset($requestContent['company']['zipCode']) ?? $company->setPostalCode($requestContent['company']['zipCode']);
 
-        isset($requestContent['company']['name']) ?? $company->setName($requestContent['company']['name']);
-        isset($requestContent['company']['taxpayerIdentificationNumber']) ?? $company->setTaxpayerIdentificationNumber($requestContent['company']['taxpayerIdentificationNumber']);
-        isset($requestContent['company']['address']) ?? $company->setAddress($requestContent['company']['address']);
-        isset($requestContent['company']['city']) ?? $company->setCity($requestContent['company']['city']);
-        isset($requestContent['company']['zipCode']) ?? $company->setPostalCode($requestContent['company']['zipCode']);
-
-        $entityManager->persist($company);
-        $entityManager->flush();
+            $entityManager->persist($company);
+            $entityManager->flush();
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()]);
+        }
 
         $data =  [
             'id' => $company->getId(),
             'name' => $company->getName(),
-            'description' => $company->getDescription(),
+            'taxerpayerIdentificationNumber' => $company->getTaxpayerIdentificationNumber(),
+            'address' => $company->getAddress(),
+            'city' => $company->getCity(),
+            'zipCode' => $company->getPostalCode()
         ];
 
         return $this->json($data);
     }
 
+    /**
+     * @param EntityManagerInterface $entityManager
+     * @param int $id
+     * @return JsonResponse
+     */
     #[Route('/company/{id}', name: 'company_delete', methods:['delete'] )]
     public function delete(EntityManagerInterface $entityManager, int $id): JsonResponse
     {
