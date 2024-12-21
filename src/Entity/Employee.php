@@ -2,12 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\EmployeesRepository;
+use App\Repository\EmployeeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: EmployeesRepository::class)]
-class Employees
+#[ORM\Entity(repositoryClass: EmployeeRepository::class)]
+class Employee
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -25,9 +25,6 @@ class Employees
 
     #[ORM\Column(length: 255)]
     private ?string $phoneNumber = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $phoneMumber = null;
 
     public function getId(): ?int
     {
@@ -78,18 +75,6 @@ class Employees
     public function setPhoneNumber(string $phoneNumber): static
     {
         $this->phoneNumber = $phoneNumber;
-
-        return $this;
-    }
-
-    public function getPhoneMumber(): ?string
-    {
-        return $this->phoneMumber;
-    }
-
-    public function setPhoneMumber(?string $phoneMumber): static
-    {
-        $this->phoneMumber = $phoneMumber;
 
         return $this;
     }
